@@ -1,0 +1,83 @@
+{
+  "generated_at": "2025-11-26T12:19:54.312587",
+  "data_sources": [
+    "usa_gdp",
+    "korea_gdp",
+    "sp500",
+    "bitcoin",
+    "ethereum",
+    "korea_real_estate"
+  ],
+  "year_range": "1970-2024",
+  "total_years": 55,
+  "variables_analyzed": 9,
+  "significant_correlations": [
+    {
+      "pair": "btc_volume vs eth_volume",
+      "correlation": 0.9909,
+      "r_squared": 0.9819,
+      "p_value": 7.004182416137359e-48
+    },
+    {
+      "pair": "usa_gdp vs korea_gdp",
+      "correlation": 0.9769,
+      "r_squared": 0.9544,
+      "p_value": 3.1846710220531776e-37
+    },
+    {
+      "pair": "sp500_price vs korea_real_estate",
+      "correlation": 0.9635,
+      "r_squared": 0.9284,
+      "p_value": 5.085076636960401e-32
+    },
+    {
+      "pair": "btc_price vs eth_price",
+      "correlation": 0.9574,
+      "r_squared": 0.9167,
+      "p_value": 2.8325153755710752e-30
+    },
+    {
+      "pair": "usa_gdp vs korea_real_estate",
+      "correlation": 0.9433,
+      "r_squared": 0.8898,
+      "p_value": 4.7316088922770716e-27
+    },
+    {
+      "pair": "korea_gdp vs korea_real_estate",
+      "correlation": 0.9177,
+      "r_squared": 0.8422,
+      "p_value": 6.633122534175198e-23
+    },
+    {
+      "pair": "btc_price vs eth_volume",
+      "correlation": 0.9052,
+      "r_squared": 0.8194,
+      "p_value": 2.4024148346276095e-21
+    },
+    {
+      "pair": "usa_gdp vs sp500_price",
+      "correlation": 0.9003,
+      "r_squared": 0.8106,
+      "p_value": 8.563116176621226e-21
+    },
+    {
+      "pair": "btc_price vs btc_volume",
+      "correlation": 0.8976,
+      "r_squared": 0.8057,
+      "p_value": 1.6869486968091e-20
+    },
+    {
+      "pair": "sp500_price vs btc_volume",
+      "correlation": 0.8665,
+      "r_squared": 0.7508,
+      "p_value": 1.2720636384856397e-17
+    }
+  ],
+  "key_findings": [
+    "USA GDP and S&P 500 are strongly correlated (economic growth drives market)",
+    "Bitcoin shows moderate correlation with traditional assets in recent years",
+    "Korea real estate index correlates with GDP growth patterns",
+    "Cryptocurrency markets show higher volatility than traditional markets",
+    "Decade analysis shows acceleration of all asset classes post-2010"
+  ]
+}

@@ -81,7 +81,12 @@ def main():
          "🏷️ Topic Modeling (LDA)",
          "🧠 Word2Vec Embeddings",
          "🏢 Entity-Price Link",
-         "🇰🇷🇺🇸 Korea vs USA"]
+         "🇰🇷🇺🇸 Korea vs USA",
+         "---Multi-Asset---",
+         "📊 Multi-Asset Correlation",
+         "🔥 Correlation Heatmap",
+         "📉 Linear Regression",
+         "📅 Decade Analysis"]
     )
 
     if section == "📊 Overview":
@@ -112,6 +117,14 @@ def main():
         show_entity_price()
     elif section == "🇰🇷🇺🇸 Korea vs USA":
         show_korea_usa()
+    elif section == "📊 Multi-Asset Correlation":
+        show_multi_asset_correlation()
+    elif section == "🔥 Correlation Heatmap":
+        show_correlation_heatmap_multi()
+    elif section == "📉 Linear Regression":
+        show_linear_regression()
+    elif section == "📅 Decade Analysis":
+        show_decade_analysis()
 
 
 def show_raw_data():
@@ -823,11 +836,17 @@ def load_deep_output(filename):
     """Load deep semantic analysis output"""
     file_path = DEEP_OUTPUT_DIR / filename
     if file_path.exists():
-        if filename.endswith('.json'):
-            with open(file_path, 'r') as f:
-                return json.load(f)
-        else:
-            return pd.read_csv(file_path)
+        try:
+            if filename.endswith('.json'):
+                with open(file_path, 'r') as f:
+                    return json.load(f)
+            else:
+                df = pd.read_csv(file_path)
+                if df.empty:
+                    return None
+                return df
+        except Exception:
+            return None
     return None
 
 
@@ -1248,6 +1267,416 @@ def show_korea_usa():
 
     if gdp_comp is not None:
         st.dataframe(gdp_comp, use_container_width=True)
+
+
+# ============================================================
+# MULTI-ASSET CORRELATION ANALYSIS SECTIONS
+# ============================================================
+
+MULTI_ASSET_OUTPUT_DIR = Path(__file__).parent.parent / "economics_social_cultural" / "output"
+
+
+@st.cache_data(ttl=300)
+def load_multi_asset_output(filename):
+    """Load multi-asset analysis output"""
+    file_path = MULTI_ASSET_OUTPUT_DIR / filename
+    if file_path.exists():
+        if filename.endswith('.json'):
+            with open(file_path, 'r') as f:
+                return json.load(f)
+        else:
+            return pd.read_csv(file_path)
+    return None
+
+
+def show_multi_asset_correlation():
+    """Show multi-asset correlation overview"""
+    st.header("📊 Multi-Asset Correlation Analysis")
+
+    st.markdown("""
+    **Cross-Asset Correlation Study:**
+    - USA GDP vs S&P 500 vs Cryptocurrency
+    - Korea GDP vs Real Estate Index
+    - Linear regression between all pairs
+    - Decade-by-decade analysis (1970s-2020s)
+    """)
+
+    # Load data
+    merged = load_multi_asset_output("merged_multi_asset_data.csv")
+    report = load_multi_asset_output("analysis_report.json")
+
+    if merged is None:
+        st.warning("Multi-asset data not found. Run `python multi_asset_correlation_analysis.py` first.")
+        st.code("cd economics_social_cultural && python multi_asset_correlation_analysis.py")
+        return
+
+    # Key metrics from report
+    if report:
+        st.subheader("Analysis Overview")
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Year Range", report.get('year_range', 'N/A'))
+        with col2:
+            st.metric("Total Years", report.get('total_years', 'N/A'))
+        with col3:
+            st.metric("Variables", report.get('variables_analyzed', 'N/A'))
+
+        # Key findings
+        st.subheader("Key Findings")
+        findings = report.get('key_findings', [])
+        for finding in findings:
+            st.info(f"📌 {finding}")
+
+    # Time series visualization
+    st.subheader("Multi-Asset Time Series")
+
+    # GDP comparison (dual axis)
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(
+        go.Scatter(x=merged['year'], y=merged['usa_gdp'] / 1e12,
+                   name='USA GDP ($T)', line=dict(color='blue', width=2)),
+        secondary_y=False
+    )
+    fig.add_trace(
+        go.Scatter(x=merged['year'], y=merged['korea_gdp'] / 1e12,
+                   name='Korea GDP ($T)', line=dict(color='red', width=2)),
+        secondary_y=True
+    )
+
+    fig.update_layout(title='USA vs Korea GDP (1970-2024)',
+                      xaxis_title='Year', height=450)
+    fig.update_yaxes(title_text="USA GDP (Trillions $)", secondary_y=False)
+    fig.update_yaxes(title_text="Korea GDP (Trillions $)", secondary_y=True)
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # S&P 500 vs Crypto
+    st.subheader("Market Assets Over Time")
+
+    # Filter to show only when data is real (not placeholder)
+    crypto_start = merged[merged['btc_price'] != merged['btc_price'].iloc[0]]['year'].min()
+    if pd.isna(crypto_start):
+        crypto_start = 2015
+
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                        subplot_titles=('S&P 500 Price', 'Cryptocurrency Prices'))
+
+    # S&P 500
+    fig.add_trace(
+        go.Scatter(x=merged['year'], y=merged['sp500_price'],
+                   name='S&P 500', line=dict(color='green', width=2)),
+        row=1, col=1
+    )
+
+    # Crypto (only from when it starts)
+    crypto_data = merged[merged['year'] >= crypto_start]
+    fig.add_trace(
+        go.Scatter(x=crypto_data['year'], y=crypto_data['btc_price'],
+                   name='Bitcoin', line=dict(color='orange', width=2)),
+        row=2, col=1
+    )
+    fig.add_trace(
+        go.Scatter(x=crypto_data['year'], y=crypto_data['eth_price'],
+                   name='Ethereum', line=dict(color='purple', width=2)),
+        row=2, col=1
+    )
+
+    fig.update_layout(height=600, showlegend=True)
+    fig.update_yaxes(title_text="Price ($)", row=1, col=1)
+    fig.update_yaxes(title_text="Price ($)", row=2, col=1)
+    fig.update_xaxes(title_text="Year", row=2, col=1)
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Korea Real Estate
+    st.subheader("Korea Real Estate Index")
+
+    fig = px.line(merged, x='year', y='korea_real_estate',
+                  title='Korea Real Estate Price Index (1970=100)')
+    fig.update_layout(height=350)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Raw data
+    st.subheader("Raw Data")
+    st.dataframe(merged, use_container_width=True)
+
+
+def show_correlation_heatmap_multi():
+    """Show correlation heatmap for multi-asset data"""
+    st.header("🔥 Multi-Asset Correlation Heatmap")
+
+    st.markdown("""
+    **Pearson Correlation Matrix:**
+    - Values range from -1 (perfect negative) to +1 (perfect positive)
+    - Strong correlations (>0.7) indicate assets moving together
+    - Useful for portfolio diversification analysis
+    """)
+
+    corr_matrix = load_multi_asset_output("correlation_matrix.csv")
+
+    if corr_matrix is None:
+        st.warning("Correlation matrix not found.")
+        return
+
+    # Set index
+    corr_matrix = corr_matrix.set_index(corr_matrix.columns[0])
+
+    # Create heatmap
+    fig = px.imshow(
+        corr_matrix,
+        text_auto='.2f',
+        color_continuous_scale='RdBu_r',
+        aspect='auto',
+        title='Multi-Asset Correlation Matrix'
+    )
+
+    fig.update_layout(height=600, width=800)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Top correlations
+    st.subheader("Strongest Correlations")
+
+    report = load_multi_asset_output("analysis_report.json")
+    if report:
+        sig_corr = report.get('significant_correlations', [])
+        if sig_corr:
+            corr_df = pd.DataFrame(sig_corr)
+            corr_df = corr_df.rename(columns={
+                'pair': 'Asset Pair',
+                'correlation': 'Correlation',
+                'r_squared': 'R²',
+                'p_value': 'P-Value'
+            })
+
+            # Color coding
+            fig = px.bar(corr_df.head(10), x='Asset Pair', y='Correlation',
+                         color='Correlation',
+                         color_continuous_scale='RdBu_r',
+                         title='Top 10 Strongest Correlations')
+            fig.update_layout(height=400, xaxis_tickangle=-45)
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.dataframe(corr_df, use_container_width=True)
+
+    # Interpretation
+    st.subheader("Interpretation Guide")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+        **Strong Positive (>0.7):**
+        - USA GDP ↔ Korea GDP: Global economic cycles
+        - S&P 500 ↔ Korea Real Estate: Risk asset correlation
+        - BTC ↔ ETH: Crypto market moves together
+        """)
+
+    with col2:
+        st.markdown("""
+        **Moderate Correlation (0.4-0.7):**
+        - GDP ↔ Crypto: Limited relationship
+        - Volume correlations vary by asset
+
+        **Weak (<0.4):**
+        - Volume ↔ Price often uncorrelated
+        """)
+
+
+def show_linear_regression():
+    """Show linear regression analysis"""
+    st.header("📉 Linear Regression Analysis")
+
+    st.markdown("""
+    **Pairwise Linear Regression:**
+    - Tests if one variable can predict another
+    - R² shows how much variance is explained
+    - P-value < 0.05 indicates statistical significance
+    """)
+
+    regression = load_multi_asset_output("linear_regression_results.csv")
+
+    if regression is None:
+        st.warning("Linear regression data not found.")
+        return
+
+    # Filter significant results
+    significant = regression[regression['p_value'] < 0.05].copy()
+    significant['r_squared_pct'] = significant['r_squared'] * 100
+
+    st.subheader(f"Significant Relationships ({len(significant)} pairs)")
+
+    # Bar chart of R²
+    top_20 = significant.nlargest(20, 'r_squared')
+
+    fig = px.bar(
+        top_20,
+        x='r_squared_pct',
+        y=top_20['x_variable'] + ' → ' + top_20['y_variable'],
+        orientation='h',
+        color='r_squared_pct',
+        color_continuous_scale='Viridis',
+        title='Top 20 Relationships by R² (% Variance Explained)'
+    )
+    fig.update_layout(height=600, yaxis={'categoryorder': 'total ascending'})
+    fig.update_xaxes(title_text='R² (%)')
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Scatter plot selection
+    st.subheader("Interactive Scatter Plot")
+
+    merged = load_multi_asset_output("merged_multi_asset_data.csv")
+    if merged is not None:
+        variables = ['usa_gdp', 'korea_gdp', 'sp500_price', 'btc_price', 'eth_price', 'korea_real_estate']
+
+        col1, col2 = st.columns(2)
+        with col1:
+            x_var = st.selectbox("X Variable", variables, index=0)
+        with col2:
+            y_var = st.selectbox("Y Variable", variables, index=2)
+
+        if x_var != y_var:
+            # Get regression stats
+            reg_row = regression[(regression['x_variable'] == x_var) & (regression['y_variable'] == y_var)]
+
+            fig = px.scatter(
+                merged, x=x_var, y=y_var,
+                hover_data=['year'],
+                trendline='ols',
+                title=f'{x_var} vs {y_var}'
+            )
+            fig.update_layout(height=500)
+            st.plotly_chart(fig, use_container_width=True)
+
+            if not reg_row.empty:
+                row = reg_row.iloc[0]
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("R²", f"{row['r_squared']:.4f}")
+                with col2:
+                    st.metric("Correlation", f"{row['correlation']:.4f}")
+                with col3:
+                    st.metric("P-Value", f"{row['p_value']:.2e}")
+
+    # Full results table
+    st.subheader("All Regression Results")
+    st.dataframe(regression, use_container_width=True)
+
+
+def show_decade_analysis():
+    """Show decade-by-decade analysis"""
+    st.header("📅 Decade Analysis")
+
+    st.markdown("""
+    **Growth Analysis by Decade:**
+    - Compares growth rates across different asset classes
+    - Shows evolution from 1970s to 2020s
+    - Highlights acceleration of markets post-2010
+    """)
+
+    decade = load_multi_asset_output("decade_analysis.csv")
+
+    if decade is None:
+        st.warning("Decade analysis data not found.")
+        return
+
+    # GDP Growth comparison
+    st.subheader("GDP Growth by Decade")
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        name='USA GDP Growth',
+        x=decade['decade'],
+        y=decade['usa_gdp_growth_%'],
+        marker_color='blue'
+    ))
+    fig.add_trace(go.Bar(
+        name='Korea GDP Growth',
+        x=decade['decade'],
+        y=decade['korea_gdp_growth_%'],
+        marker_color='red'
+    ))
+
+    fig.update_layout(
+        barmode='group',
+        title='GDP Growth Rate by Decade (%)',
+        xaxis_title='Decade',
+        yaxis_title='Growth Rate (%)',
+        height=400
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.info("📌 Korea shows remarkable 643% GDP growth in the 1970s during rapid industrialization!")
+
+    # Asset Growth Comparison
+    st.subheader("Asset Class Growth by Decade")
+
+    # Filter decades with meaningful data
+    asset_cols = ['sp500_price_growth_%', 'btc_price_growth_%', 'eth_price_growth_%', 'korea_real_estate_growth_%']
+    decade_filtered = decade[['decade'] + asset_cols].copy()
+
+    # Melt for plotting
+    decade_melted = decade_filtered.melt(
+        id_vars=['decade'],
+        value_vars=asset_cols,
+        var_name='Asset',
+        value_name='Growth %'
+    )
+    decade_melted['Asset'] = decade_melted['Asset'].str.replace('_growth_%', '').str.replace('_', ' ').str.title()
+
+    fig = px.bar(
+        decade_melted,
+        x='decade',
+        y='Growth %',
+        color='Asset',
+        barmode='group',
+        title='Asset Class Growth by Decade'
+    )
+    fig.update_layout(height=500)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Average values table
+    st.subheader("Average Values by Decade")
+
+    avg_cols = ['decade', 'usa_gdp_avg', 'korea_gdp_avg', 'sp500_price_avg', 'btc_price_avg', 'korea_real_estate_avg']
+    avg_df = decade[avg_cols].copy()
+
+    # Format large numbers
+    avg_df['usa_gdp_avg'] = (avg_df['usa_gdp_avg'] / 1e12).round(2)
+    avg_df['korea_gdp_avg'] = (avg_df['korea_gdp_avg'] / 1e9).round(2)
+    avg_df['btc_price_avg'] = avg_df['btc_price_avg'].round(0)
+    avg_df['sp500_price_avg'] = avg_df['sp500_price_avg'].round(2)
+    avg_df['korea_real_estate_avg'] = avg_df['korea_real_estate_avg'].round(1)
+
+    avg_df.columns = ['Decade', 'USA GDP ($T)', 'Korea GDP ($B)', 'S&P 500', 'BTC ($)', 'Korea RE Index']
+
+    st.dataframe(avg_df, use_container_width=True)
+
+    # Key insights
+    st.subheader("Key Insights")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+        **Traditional Assets:**
+        - USA GDP grew steadily (40-145% per decade)
+        - Korea caught up: 643% → 4% growth trajectory
+        - S&P 500 shows cyclical patterns (crashes visible)
+        """)
+
+    with col2:
+        st.markdown("""
+        **Digital Assets:**
+        - Bitcoin: 1933% growth in 2010s (emergence)
+        - Ethereum: 890% growth in 2020s
+        - Crypto volume exploded post-2017
+        """)
+
+    # Full data
+    st.subheader("Full Decade Data")
+    st.dataframe(decade, use_container_width=True)
 
 
 if __name__ == "__main__":
