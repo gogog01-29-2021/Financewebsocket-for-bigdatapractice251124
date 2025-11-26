@@ -1,0 +1,29 @@
+{
+  "generated_at": "2025-11-26T10:17:06.994744",
+  "analyses_completed": [
+    "N-gram (Bigram/Trigram) Analysis",
+    "TF-IDF by Sentiment",
+    "LDA Topic Modeling",
+    "Word2Vec Embeddings",
+    "Entity-Price Correlation",
+    "Korea-USA Economic Comparison"
+  ],
+  "output_files": [
+    "entity_price_correlation.csv",
+    "korea_market_analysis.json",
+    "korea_usa_comparison.json",
+    "korea_usa_gdp_comparison.csv",
+    "kospi_index.csv",
+    "krw_exchange_rate.csv",
+    "lda_topics.csv",
+    "lda_topic_distribution.csv",
+    "lda_topic_sentiment.csv",
+    "ngram_analysis.csv",
+    "samsung_stock.csv",
+    "tfidf_by_sentiment.csv",
+    "usa_market_performance.csv",
+    "word2vec_model.bin",
+    "word2vec_similarities.csv",
+    "word2vec_vectors.csv"
+  ]
+}

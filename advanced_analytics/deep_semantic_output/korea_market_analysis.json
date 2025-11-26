@@ -1,0 +1,32 @@
+{
+  "kospi": {
+    "avg_daily_return": 0.03910077694989389,
+    "volatility": 1.161801227307085,
+    "total_return": 48.454446640380525,
+    "sharpe_approx": 0.5342614353331988,
+    "latest_close": 3898.280029296875,
+    "records": 1223
+  },
+  "krw": {
+    "latest_rate": 1458.5799560546875,
+    "avg_rate": 1296.9337185392365,
+    "min_rate": 1083.6800537109375,
+    "max_rate": 1486.1300048828125,
+    "volatility": 0.5934780374559118,
+    "records": 1302
+  },
+  "samsung": {
+    "avg_daily_return": 0.056343330595192,
+    "volatility": 1.6952940641082974,
+    "total_return": 67.11373743562189,
+    "latest_close": 100200.0,
+    "records": 1223
+  },
+  "kospi_spy_correlation": 0.11017439489270459,
+  "comparison": {
+    "kospi_return": 48.454446640380525,
+    "spy_return": 99.1002122596057,
+    "kospi_volatility": 1.161801227307085,
+    "spy_volatility": 1.0785492950652718
+  }
+}

@@ -59,19 +59,31 @@ def main():
 
     # Sidebar
     st.sidebar.title("Analysis Sections")
+
+    st.sidebar.markdown("**Basic Analysis**")
     section = st.sidebar.radio(
         "Select Analysis",
         ["📊 Overview",
+         "📁 Raw Data Explorer",
          "🏆 PageRank Word Importance",
          "🕸️ Word Network Graph",
          "📝 Formal vs Informal",
          "📈 Word-Price Causality",
          "💬 Social Media Analysis",
-         "🔄 Granger Causality"]
+         "🔄 Granger Causality",
+         "---Deep Semantic---",
+         "📚 N-gram Phrases",
+         "🎯 TF-IDF Analysis",
+         "🏷️ Topic Modeling (LDA)",
+         "🧠 Word2Vec Embeddings",
+         "🏢 Entity-Price Link",
+         "🇰🇷🇺🇸 Korea vs USA"]
     )
 
     if section == "📊 Overview":
         show_overview()
+    elif section == "📁 Raw Data Explorer":
+        show_raw_data()
     elif section == "🏆 PageRank Word Importance":
         show_pagerank()
     elif section == "🕸️ Word Network Graph":
@@ -84,6 +96,150 @@ def main():
         show_social_media()
     elif section == "🔄 Granger Causality":
         show_granger()
+    elif section == "📚 N-gram Phrases":
+        show_ngrams()
+    elif section == "🎯 TF-IDF Analysis":
+        show_tfidf()
+    elif section == "🏷️ Topic Modeling (LDA)":
+        show_lda()
+    elif section == "🧠 Word2Vec Embeddings":
+        show_word2vec()
+    elif section == "🏢 Entity-Price Link":
+        show_entity_price()
+    elif section == "🇰🇷🇺🇸 Korea vs USA":
+        show_korea_usa()
+
+
+def show_raw_data():
+    """Show raw data explorer"""
+    st.header("📁 Raw Data Explorer")
+
+    st.markdown("""
+    Explore all source data and analysis outputs.
+    """)
+
+    tabs = st.tabs(["📈 Stock Data", "📰 News Headlines", "🌍 Economic Data", "📊 Analysis Outputs"])
+
+    with tabs[0]:
+        st.subheader("Stock Data (Yahoo Finance)")
+        stock_file = DATA_DIR / "stock_data.csv"
+        if stock_file.exists():
+            stock_df = pd.read_csv(stock_file)
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Records", f"{len(stock_df):,}")
+            with col2:
+                st.metric("Symbols", stock_df['symbol'].nunique() if 'symbol' in stock_df.columns else 'N/A')
+            with col3:
+                if 'date' in stock_df.columns:
+                    st.metric("Date Range", f"{stock_df['date'].min()} to {stock_df['date'].max()}")
+
+            # Filter by symbol
+            if 'symbol' in stock_df.columns:
+                symbols = ['All'] + sorted(stock_df['symbol'].unique().tolist())
+                selected_symbol = st.selectbox("Filter by Symbol", symbols)
+                if selected_symbol != 'All':
+                    stock_df = stock_df[stock_df['symbol'] == selected_symbol]
+
+            st.dataframe(stock_df.head(500), use_container_width=True)
+            st.caption(f"Showing first 500 rows of {len(stock_df):,} total")
+        else:
+            st.warning("Stock data not found.")
+
+    with tabs[1]:
+        st.subheader("News Headlines")
+        news_file = DATA_DIR / "news_headlines.csv"
+        if news_file.exists():
+            news_df = pd.read_csv(news_file)
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Headlines", f"{len(news_df):,}")
+            with col2:
+                if 'sentiment' in news_df.columns:
+                    st.metric("Positive %", f"{(news_df['sentiment'] == 'positive').mean()*100:.1f}%")
+            with col3:
+                if 'sentiment' in news_df.columns:
+                    st.metric("Negative %", f"{(news_df['sentiment'] == 'negative').mean()*100:.1f}%")
+
+            # Filter by sentiment
+            if 'sentiment' in news_df.columns:
+                sentiments = ['All'] + sorted(news_df['sentiment'].unique().tolist())
+                selected_sentiment = st.selectbox("Filter by Sentiment", sentiments)
+                if selected_sentiment != 'All':
+                    news_df = news_df[news_df['sentiment'] == selected_sentiment]
+
+            # Search headlines
+            search_term = st.text_input("Search Headlines", "")
+            if search_term:
+                news_df = news_df[news_df['headline'].str.contains(search_term, case=False, na=False)]
+
+            st.dataframe(news_df.head(500), use_container_width=True)
+            st.caption(f"Showing first 500 rows of {len(news_df):,} total")
+        else:
+            st.warning("News data not found.")
+
+    with tabs[2]:
+        st.subheader("Economic Indicators")
+
+        # World Bank GDP
+        gdp_file = DATA_DIR / "worldbank_gdp.csv"
+        if gdp_file.exists():
+            gdp_df = pd.read_csv(gdp_file)
+            st.write("**World Bank GDP Data**")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Records", f"{len(gdp_df):,}")
+            with col2:
+                if 'country' in gdp_df.columns:
+                    st.metric("Countries", gdp_df['country'].nunique())
+
+            st.dataframe(gdp_df.head(200), use_container_width=True)
+
+        # Economic indicators
+        econ_file = DATA_DIR / "economic_indicators.csv"
+        if econ_file.exists():
+            econ_df = pd.read_csv(econ_file)
+            st.write("**Economic Indicators (FRED-style)**")
+            st.dataframe(econ_df.head(200), use_container_width=True)
+
+    with tabs[3]:
+        st.subheader("Analysis Output Files")
+
+        output_files = list(OUTPUT_DIR.glob("*.csv")) + list(OUTPUT_DIR.glob("*.json"))
+
+        if not output_files:
+            st.warning("No analysis outputs found. Run advanced_spark_cross_analysis.py first.")
+            return
+
+        file_info = []
+        for f in output_files:
+            size_kb = f.stat().st_size / 1024
+            file_info.append({
+                'File': f.name,
+                'Size (KB)': f"{size_kb:.1f}",
+                'Type': f.suffix
+            })
+
+        st.dataframe(pd.DataFrame(file_info), use_container_width=True)
+
+        # Select file to view
+        file_names = [f.name for f in output_files]
+        selected_file = st.selectbox("Select file to preview", file_names)
+
+        if selected_file:
+            file_path = OUTPUT_DIR / selected_file
+            if selected_file.endswith('.csv'):
+                df = pd.read_csv(file_path)
+                st.write(f"**{selected_file}** ({len(df)} rows)")
+                st.dataframe(df, use_container_width=True)
+            elif selected_file.endswith('.json'):
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+                st.write(f"**{selected_file}**")
+                st.json(data)
 
 
 def show_overview():
@@ -639,6 +795,445 @@ def show_granger():
     # Full table
     st.subheader("Full Correlation Data")
     st.dataframe(granger, use_container_width=True)
+
+
+# ============================================================
+# DEEP SEMANTIC ANALYSIS SECTIONS
+# ============================================================
+
+DEEP_OUTPUT_DIR = Path(__file__).parent / "deep_semantic_output"
+
+
+@st.cache_data(ttl=300)
+def load_deep_output(filename):
+    """Load deep semantic analysis output"""
+    file_path = DEEP_OUTPUT_DIR / filename
+    if file_path.exists():
+        if filename.endswith('.json'):
+            with open(file_path, 'r') as f:
+                return json.load(f)
+        else:
+            return pd.read_csv(file_path)
+    return None
+
+
+def show_ngrams():
+    """Show N-gram phrase analysis"""
+    st.header("📚 N-gram (Phrase) Analysis")
+
+    st.markdown("""
+    **N-grams** are sequences of N consecutive words:
+    - **Bigrams (2-grams)**: "interest rate", "stock market"
+    - **Trigrams (3-grams)**: "federal reserve bank", "quarterly earnings report"
+
+    These reveal meaningful phrases that single words miss.
+    """)
+
+    ngrams = load_deep_output("ngram_analysis.csv")
+
+    if ngrams is None:
+        st.warning("N-gram data not found. Run `python deep_semantic_analysis.py` first.")
+        st.code("cd advanced_analytics && python deep_semantic_analysis.py")
+        return
+
+    # Filter by n-gram type
+    n_values = ngrams['n'].unique()
+    selected_n = st.selectbox("N-gram Type", sorted(n_values), format_func=lambda x: f"{x}-gram")
+
+    filtered = ngrams[ngrams['n'] == selected_n].head(50)
+
+    # Bar chart
+    fig = px.bar(
+        filtered,
+        x='total_count',
+        y='ngram',
+        orientation='h',
+        title=f'Top {selected_n}-grams by Frequency',
+        color='total_count',
+        color_continuous_scale='Viridis'
+    )
+    fig.update_layout(height=800, yaxis={'categoryorder': 'total ascending'})
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Sentiment breakdown
+    st.subheader("Sentiment Breakdown")
+
+    if 'positive' in filtered.columns and 'negative' in filtered.columns:
+        fig = go.Figure()
+
+        top_ngrams = filtered.head(20)
+
+        fig.add_trace(go.Bar(name='Positive', x=top_ngrams['ngram'], y=top_ngrams['positive'].fillna(0),
+                             marker_color='green'))
+        fig.add_trace(go.Bar(name='Negative', x=top_ngrams['ngram'], y=top_ngrams['negative'].fillna(0),
+                             marker_color='red'))
+        fig.add_trace(go.Bar(name='Neutral', x=top_ngrams['ngram'], y=top_ngrams['neutral'].fillna(0),
+                             marker_color='gray'))
+
+        fig.update_layout(barmode='stack', xaxis_tickangle=-45, height=500,
+                          title='N-gram Sentiment Distribution')
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.dataframe(filtered, use_container_width=True)
+
+
+def show_tfidf():
+    """Show TF-IDF analysis"""
+    st.header("🎯 TF-IDF Analysis")
+
+    st.markdown("""
+    **TF-IDF (Term Frequency - Inverse Document Frequency)** finds words that are:
+    - Common in specific categories (high TF)
+    - Rare across all categories (high IDF)
+
+    High TF-IDF = distinctive word for that category.
+    """)
+
+    tfidf = load_deep_output("tfidf_by_sentiment.csv")
+
+    if tfidf is None:
+        st.warning("TF-IDF data not found. Run `python deep_semantic_analysis.py` first.")
+        return
+
+    # Filter by sentiment
+    sentiments = tfidf['sentiment'].unique()
+
+    col1, col2, col3 = st.columns(3)
+
+    for i, sentiment in enumerate(sentiments[:3]):
+        with [col1, col2, col3][i]:
+            st.subheader(f"{sentiment.title()}")
+
+            sent_data = tfidf[tfidf['sentiment'] == sentiment].head(15)
+
+            fig = px.bar(
+                sent_data,
+                x='tfidf_score',
+                y='word',
+                orientation='h',
+                color='tfidf_score',
+                color_continuous_scale='Blues' if sentiment == 'neutral' else ('Greens' if sentiment == 'positive' else 'Reds')
+            )
+            fig.update_layout(height=400, yaxis={'categoryorder': 'total ascending'}, showlegend=False)
+            st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("Full TF-IDF Results")
+    st.dataframe(tfidf, use_container_width=True)
+
+
+def show_lda():
+    """Show LDA topic modeling"""
+    st.header("🏷️ Topic Modeling (LDA)")
+
+    st.markdown("""
+    **Latent Dirichlet Allocation (LDA)** automatically discovers hidden topics in text:
+    - Each topic is a distribution over words
+    - Each document belongs to multiple topics
+    - Reveals underlying themes in news headlines
+    """)
+
+    topics = load_deep_output("lda_topics.csv")
+    topic_dist = load_deep_output("lda_topic_distribution.csv")
+    topic_sentiment = load_deep_output("lda_topic_sentiment.csv")
+
+    if topics is None:
+        st.warning("LDA data not found. Run `python deep_semantic_analysis.py` first.")
+        return
+
+    # Topic distribution pie chart
+    if topic_dist is not None:
+        st.subheader("Topic Distribution")
+
+        fig = px.pie(
+            topic_dist,
+            values='count',
+            names='dominant_topic',
+            title='Document Distribution Across Topics'
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Topics detail
+    st.subheader("Discovered Topics")
+
+    topic_ids = topics['topic_id'].unique()
+
+    for topic_id in sorted(topic_ids):
+        topic_data = topics[topics['topic_id'] == topic_id]
+        topic_name = topic_data['topic_name'].iloc[0] if 'topic_name' in topic_data.columns else f"Topic {topic_id}"
+
+        with st.expander(f"📌 {topic_name}"):
+            fig = px.bar(
+                topic_data,
+                x='weight',
+                y='word',
+                orientation='h',
+                color='weight',
+                color_continuous_scale='Viridis'
+            )
+            fig.update_layout(height=400, yaxis={'categoryorder': 'total ascending'})
+            st.plotly_chart(fig, use_container_width=True)
+
+    # Topic-sentiment relationship
+    if topic_sentiment is not None:
+        st.subheader("Topic-Sentiment Relationship")
+
+        pivot = topic_sentiment.pivot_table(
+            index='dominant_topic', columns='sentiment', values='count', fill_value=0
+        ).reset_index()
+
+        fig = go.Figure()
+        for sentiment in ['positive', 'negative', 'neutral']:
+            if sentiment in pivot.columns:
+                fig.add_trace(go.Bar(
+                    name=sentiment.title(),
+                    x=pivot['dominant_topic'],
+                    y=pivot[sentiment],
+                    marker_color={'positive': 'green', 'negative': 'red', 'neutral': 'gray'}[sentiment]
+                ))
+
+        fig.update_layout(barmode='stack', title='Sentiment Distribution per Topic',
+                          xaxis_title='Topic', yaxis_title='Document Count')
+        st.plotly_chart(fig, use_container_width=True)
+
+
+def show_word2vec():
+    """Show Word2Vec embeddings"""
+    st.header("🧠 Word2Vec Embeddings")
+
+    st.markdown("""
+    **Word2Vec** learns word meanings from context:
+    - Words with similar contexts have similar vectors
+    - Enables semantic similarity calculations
+    - Example: "stock" is similar to "equity", "share"
+    """)
+
+    similarities = load_deep_output("word2vec_similarities.csv")
+
+    if similarities is None:
+        st.warning("Word2Vec data not found. Run `python deep_semantic_analysis.py` first.")
+        return
+
+    # Similar words for each term
+    st.subheader("Similar Words for Key Financial Terms")
+
+    terms = similarities['term'].unique()
+
+    cols = st.columns(3)
+    for i, term in enumerate(terms):
+        with cols[i % 3]:
+            st.write(f"**'{term}'** similar to:")
+            term_data = similarities[similarities['term'] == term]
+            for _, row in term_data.iterrows():
+                similarity_pct = row['similarity'] * 100
+                st.write(f"  • {row['similar_word']}: {similarity_pct:.1f}%")
+            st.write("")
+
+    # Similarity heatmap
+    st.subheader("Word Similarity Network")
+
+    fig = px.scatter(
+        similarities,
+        x='term',
+        y='similar_word',
+        size='similarity',
+        color='similarity',
+        color_continuous_scale='Viridis',
+        title='Word Similarity Map'
+    )
+    fig.update_layout(height=600)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.dataframe(similarities, use_container_width=True)
+
+
+def show_entity_price():
+    """Show entity-price correlation"""
+    st.header("🏢 Entity-Specific Price Correlation")
+
+    st.markdown("""
+    **Entity-Price Analysis** measures how mentions of specific companies affect their stock prices:
+    - Same-day correlation: Do mentions coincide with price moves?
+    - Next-day correlation: Do mentions predict future prices?
+    """)
+
+    entity_corr = load_deep_output("entity_price_correlation.csv")
+
+    if entity_corr is None:
+        st.warning("Entity-price data not found. Run `python deep_semantic_analysis.py` first.")
+        return
+
+    # Key metrics
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Same-Day Correlation")
+        fig = px.bar(
+            entity_corr,
+            x='same_day_corr',
+            y='symbol',
+            orientation='h',
+            color='same_day_corr',
+            color_continuous_scale='RdYlGn',
+            title='Mention-Price Same-Day Correlation'
+        )
+        fig.add_vline(x=0, line_dash="dash")
+        fig.update_layout(height=400, yaxis={'categoryorder': 'total ascending'})
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        st.subheader("Next-Day (Predictive) Correlation")
+        fig = px.bar(
+            entity_corr,
+            x='next_day_corr',
+            y='symbol',
+            orientation='h',
+            color='next_day_corr',
+            color_continuous_scale='RdYlGn',
+            title='Mention Today → Price Tomorrow'
+        )
+        fig.add_vline(x=0, line_dash="dash")
+        fig.update_layout(height=400, yaxis={'categoryorder': 'total ascending'})
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Mention counts
+    st.subheader("Total Mentions by Stock")
+    fig = px.bar(
+        entity_corr,
+        x='symbol',
+        y='total_mentions',
+        color='total_mentions',
+        title='News Mentions per Stock'
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.dataframe(entity_corr, use_container_width=True)
+
+
+def show_korea_usa():
+    """Show Korea vs USA comparison"""
+    st.header("🇰🇷🇺🇸 Korea vs USA Economic Comparison")
+
+    st.markdown("""
+    **Comparing Two Economies:**
+    - GDP growth trends over 50+ years
+    - Economic correlation
+    - Market performance comparison
+    """)
+
+    gdp_comp = load_deep_output("korea_usa_gdp_comparison.csv")
+    comparison = load_deep_output("korea_usa_comparison.json")
+    usa_market = load_deep_output("usa_market_performance.csv")
+
+    if gdp_comp is None and comparison is None:
+        st.warning("Korea-USA comparison data not found. Run `python deep_semantic_analysis.py` first.")
+        return
+
+    # Key metrics
+    if comparison:
+        st.subheader("Key Metrics")
+
+        metrics = comparison.get('key_metrics', {})
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            if 'korea_avg_growth_10yr' in metrics:
+                st.metric("Korea Avg Growth (10yr)", f"{metrics['korea_avg_growth_10yr']:.2f}%")
+        with col2:
+            if 'usa_avg_growth_10yr' in metrics:
+                st.metric("USA Avg Growth (10yr)", f"{metrics['usa_avg_growth_10yr']:.2f}%")
+        with col3:
+            if 'growth_correlation' in metrics:
+                st.metric("Growth Correlation", f"{metrics['growth_correlation']:.3f}")
+
+    # GDP over time
+    if gdp_comp is not None:
+        st.subheader("GDP Over Time")
+
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(x=gdp_comp['year'], y=gdp_comp['usa_gdp'],
+                       name='USA GDP', line=dict(color='blue')),
+            secondary_y=False
+        )
+        fig.add_trace(
+            go.Scatter(x=gdp_comp['year'], y=gdp_comp['korea_gdp'],
+                       name='Korea GDP', line=dict(color='red')),
+            secondary_y=True
+        )
+
+        fig.update_layout(title='GDP Comparison: USA vs Korea',
+                          xaxis_title='Year', height=500)
+        fig.update_yaxes(title_text="USA GDP", secondary_y=False)
+        fig.update_yaxes(title_text="Korea GDP", secondary_y=True)
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # GDP Growth comparison
+        st.subheader("GDP Growth Rate Comparison")
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=gdp_comp['year'], y=gdp_comp['usa_growth'],
+            name='USA Growth', line=dict(color='blue')
+        ))
+        fig.add_trace(go.Scatter(
+            x=gdp_comp['year'], y=gdp_comp['korea_growth'],
+            name='Korea Growth', line=dict(color='red')
+        ))
+        fig.add_hline(y=0, line_dash="dash", line_color="gray")
+        fig.update_layout(title='GDP Growth Rate (%)', xaxis_title='Year',
+                          yaxis_title='Growth Rate (%)', height=400)
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Korea/USA ratio over time
+        st.subheader("Korea GDP as % of USA GDP")
+
+        fig = px.line(
+            gdp_comp,
+            x='year',
+            y='ratio_korea_usa',
+            title='Korea GDP / USA GDP Ratio Over Time'
+        )
+        fig.update_layout(yaxis_title='Ratio', height=400)
+        st.plotly_chart(fig, use_container_width=True)
+
+    # US Market Performance
+    if usa_market is not None and comparison and 'us_market' in comparison:
+        st.subheader("US Market Performance (SPY)")
+
+        us_metrics = comparison['us_market']
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Avg Daily Return", f"{us_metrics.get('avg_daily_return', 0):.4f}%")
+        with col2:
+            st.metric("Volatility", f"{us_metrics.get('volatility', 0):.4f}%")
+        with col3:
+            st.metric("Total Return", f"{us_metrics.get('total_return', 0):.2f}%")
+        with col4:
+            st.metric("Sharpe Ratio", f"{us_metrics.get('sharpe_approx', 0):.2f}")
+
+    # Summary insights
+    st.subheader("Key Insights")
+
+    st.markdown("""
+    **Economic Comparison Insights:**
+
+    1. **Size Difference**: USA GDP is significantly larger, but Korea has shown rapid growth
+    2. **Growth Patterns**: Both economies show correlated business cycles
+    3. **Development Stage**: Korea transitioned from developing to developed economy
+    4. **Trade Relationship**: Strong economic ties between the two nations
+
+    **Note**: For deeper Korea-specific analysis, consider adding:
+    - KOSPI index data
+    - Korean Won (KRW) exchange rates
+    - Korea-specific news sentiment
+    """)
+
+    if gdp_comp is not None:
+        st.dataframe(gdp_comp, use_container_width=True)
 
 
 if __name__ == "__main__":
