@@ -1,0 +1,212 @@
+{
+  "generated_at": "2025-11-25T18:09:43.361920",
+  "analysis_type": "Advanced Cross-Source Analysis with PageRank",
+  "engine": "PySpark",
+  "analyses_performed": [
+    "PageRank for Word Importance",
+    "Word Co-occurrence Graph",
+    "Formal vs Informal Language Comparison",
+    "Word-Price Temporal Analysis",
+    "Bidirectional Causality (Granger-style)",
+    "Social Media Sentiment Analysis"
+  ],
+  "key_findings": {
+    "top_pagerank_words": [
+      {
+        "word": "wall",
+        "pagerank": 0.02782442204010016,
+        "frequency": 1187,
+        "rank": 1
+      },
+      {
+        "word": "street",
+        "pagerank": 0.02782442204010016,
+        "frequency": 1187,
+        "rank": 2
+      },
+      {
+        "word": "upgrades",
+        "pagerank": 0.02004787527035262,
+        "frequency": 612,
+        "rank": 3
+      },
+      {
+        "word": "'buy'",
+        "pagerank": 0.02004787527035262,
+        "frequency": 612,
+        "rank": 4
+      },
+      {
+        "word": "target",
+        "pagerank": 0.02004787527035262,
+        "frequency": 612,
+        "rank": 5
+      },
+      {
+        "word": "concerns",
+        "pagerank": 0.013584825974017856,
+        "frequency": 2504,
+        "rank": 6
+      },
+      {
+        "word": "market",
+        "pagerank": 0.01338839893592907,
+        "frequency": 2309,
+        "rank": 7
+      },
+      {
+        "word": "earnings",
+        "pagerank": 0.012248189580386815,
+        "frequency": 2104,
+        "rank": 8
+      },
+      {
+        "word": "announces",
+        "pagerank": 0.01217312418980455,
+        "frequency": 1273,
+        "rank": 9
+      },
+      {
+        "word": "stock",
+        "pagerank": 0.011037186197578808,
+        "frequency": 1857,
+        "rank": 10
+      },
+      {
+        "word": "goldman",
+        "pagerank": 0.009216471709701217,
+        "frequency": 956,
+        "rank": 11
+      },
+      {
+        "word": "sachs",
+        "pagerank": 0.008846353776186868,
+        "frequency": 909,
+        "rank": 12
+      },
+      {
+        "word": "amid",
+        "pagerank": 0.008808881839935922,
+        "frequency": 1495,
+        "rank": 13
+      },
+      {
+        "word": "growth",
+        "pagerank": 0.008756915921626156,
+        "frequency": 1412,
+        "rank": 14
+      },
+      {
+        "word": "bank",
+        "pagerank": 0.008113517716010474,
+        "frequency": 917,
+        "rank": 15
+      },
+      {
+        "word": "downgrades",
+        "pagerank": 0.008014806416483401,
+        "frequency": 575,
+        "rank": 16
+      },
+      {
+        "word": "citing",
+        "pagerank": 0.008014806416483401,
+        "frequency": 575,
+        "rank": 17
+      },
+      {
+        "word": "investors",
+        "pagerank": 0.007983209571819487,
+        "frequency": 2291,
+        "rank": 18
+      },
+      {
+        "word": "tesla",
+        "pagerank": 0.007674287031031753,
+        "frequency": 936,
+        "rank": 19
+      },
+      {
+        "word": "america",
+        "pagerank": 0.007651244590745443,
+        "frequency": 856,
+        "rank": 20
+      }
+    ],
+    "sentiment_by_source": [
+      {
+        "source": "news",
+        "positive_pct": 34.6159240731217,
+        "negative_pct": 34.93384449950909,
+        "neutral_pct": 30.450231427369207,
+        "avg_sentiment": -0.002516854457898919
+      },
+      {
+        "source": "youtube",
+        "positive_pct": 39.48,
+        "negative_pct": 30.18,
+        "neutral_pct": 30.34,
+        "avg_sentiment": 0.05579984335267729
+      },
+      {
+        "source": "reddit",
+        "positive_pct": 44.54,
+        "negative_pct": 29.89,
+        "neutral_pct": 25.569999999999997,
+        "avg_sentiment": 0.08643277133377342
+      }
+    ],
+    "granger_analysis": [
+      {
+        "direction": "sentiment_to_return",
+        "lag": 1,
+        "correlation": 0.03785333543971632
+      },
+      {
+        "direction": "return_to_sentiment",
+        "lag": 1,
+        "correlation": -0.001593343303287376
+      },
+      {
+        "direction": "sentiment_to_return",
+        "lag": 2,
+        "correlation": -0.01640265101958823
+      },
+      {
+        "direction": "return_to_sentiment",
+        "lag": 2,
+        "correlation": -0.0024081081473971
+      },
+      {
+        "direction": "sentiment_to_return",
+        "lag": 3,
+        "correlation": -0.02255722315213464
+      },
+      {
+        "direction": "return_to_sentiment",
+        "lag": 3,
+        "correlation": 0.027486566024788568
+      },
+      {
+        "direction": "sentiment_to_return",
+        "lag": 4,
+        "correlation": -0.020065557147672497
+      },
+      {
+        "direction": "return_to_sentiment",
+        "lag": 4,
+        "correlation": 0.03946518529920732
+      },
+      {
+        "direction": "sentiment_to_return",
+        "lag": 5,
+        "correlation": 0.03829476029655393
+      },
+      {
+        "direction": "return_to_sentiment",
+        "lag": 5,
+        "correlation": 0.016199380705208842
+      }
+    ]
+  }
+}

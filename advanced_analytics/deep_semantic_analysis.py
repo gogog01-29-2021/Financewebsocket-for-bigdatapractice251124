@@ -466,8 +466,18 @@ class EntityPriceCorrelation:
         # Stock symbols to track
         symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'JPM', 'GS', 'BAC']
 
+        # Normalize date formats - extract date portion only (YYYY-MM-DD)
+        news_normalized = self.news_df.withColumn(
+            "date_normalized",
+            to_date(col("date"))
+        )
+        stock_normalized = self.stock_df.withColumn(
+            "date_normalized",
+            to_date(col("date"))
+        )
+
         # Create stock mention flags
-        news_with_stocks = self.news_df
+        news_with_stocks = news_normalized
 
         for symbol in symbols:
             # Check if symbol or company name appears in headline
@@ -483,7 +493,7 @@ class EntityPriceCorrelation:
         # Aggregate by date
         mention_cols = [f"mentions_{s}" for s in symbols]
 
-        news_by_date = news_with_stocks.groupBy("date").agg(
+        news_by_date = news_with_stocks.groupBy("date_normalized").agg(
             *[spark_sum(c).alias(c) for c in mention_cols],
             avg("sentiment_score").alias("avg_sentiment"),
             count("*").alias("news_count")
@@ -495,21 +505,21 @@ class EntityPriceCorrelation:
         for symbol in symbols:
             print(f"\n[Entity] Analyzing {symbol}...")
 
-            stock_data = self.stock_df.filter(col("symbol") == symbol) \
-                .select("date", "close", "volume") \
+            stock_data = stock_normalized.filter(col("symbol") == symbol) \
+                .select("date_normalized", "close", "volume") \
                 .withColumnRenamed("close", f"{symbol}_close") \
                 .withColumnRenamed("volume", f"{symbol}_volume")
 
             # Calculate returns
-            w = Window.orderBy("date")
+            w = Window.orderBy("date_normalized")
             stock_data = stock_data.withColumn(
                 f"{symbol}_return",
                 (col(f"{symbol}_close") - lag(f"{symbol}_close", 1).over(w)) /
                 lag(f"{symbol}_close", 1).over(w)
             )
 
-            # Join with news
-            joined = news_by_date.join(stock_data, "date", "inner")
+            # Join with news using normalized dates
+            joined = news_by_date.join(stock_data, "date_normalized", "inner")
 
             # Calculate correlation between mentions and returns
             mention_col = f"mentions_{symbol}"
@@ -581,28 +591,35 @@ class KoreaUSAComparison:
             'key_metrics': {}
         }
 
-        # Filter for Korea and USA
+        # Filter for Korea and USA - must also filter by indicator for GDP
         korea_codes = ['KOR', 'KR', 'Korea']
         usa_codes = ['USA', 'US', 'United States']
+        gdp_indicator = 'NY.GDP.MKTP.CD'  # GDP (current US$)
+
+        # Filter by GDP indicator first if available
+        gdp_data = self.gdp_df
+        if 'indicator_code' in gdp_data.columns:
+            gdp_data = gdp_data.filter(col("indicator_code") == gdp_indicator)
+            print(f"\n[Korea-USA] Filtered for GDP indicator: {gdp_indicator}")
 
         # Try to find Korea and USA in GDP data
-        if 'country_code' in self.gdp_df.columns:
-            korea_gdp = self.gdp_df.filter(col("country_code").isin(korea_codes))
-            usa_gdp = self.gdp_df.filter(col("country_code").isin(usa_codes))
-        elif 'country' in self.gdp_df.columns:
-            korea_gdp = self.gdp_df.filter(
+        if 'country_code' in gdp_data.columns:
+            korea_gdp = gdp_data.filter(col("country_code").isin(korea_codes))
+            usa_gdp = gdp_data.filter(col("country_code").isin(usa_codes))
+        elif 'country' in gdp_data.columns:
+            korea_gdp = gdp_data.filter(
                 lower(col("country")).contains("korea") |
                 col("country").isin(korea_codes)
             )
-            usa_gdp = self.gdp_df.filter(
+            usa_gdp = gdp_data.filter(
                 lower(col("country")).contains("united states") |
                 lower(col("country")).contains("usa") |
                 col("country").isin(usa_codes)
             )
         else:
             print("  Warning: Cannot identify country column in GDP data")
-            korea_gdp = self.gdp_df.limit(0)
-            usa_gdp = self.gdp_df.limit(0)
+            korea_gdp = gdp_data.limit(0)
+            usa_gdp = gdp_data.limit(0)
 
         print(f"\n[Korea-USA] GDP Records - Korea: {korea_gdp.count()}, USA: {usa_gdp.count()}")
 

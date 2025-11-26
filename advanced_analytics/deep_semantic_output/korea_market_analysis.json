@@ -1,32 +1,32 @@
 {
   "kospi": {
-    "avg_daily_return": 0.03910077694989389,
-    "volatility": 1.161801227307085,
-    "total_return": 48.454446640380525,
-    "sharpe_approx": 0.5342614353331988,
-    "latest_close": 3898.280029296875,
-    "records": 1223
+    "avg_daily_return": 0.03968169736827521,
+    "volatility": 1.1618334240565253,
+    "total_return": 49.56035049978491,
+    "sharpe_approx": 0.5421839344446743,
+    "latest_close": 3927.320068359375,
+    "records": 1224
   },
   "krw": {
-    "latest_rate": 1458.5799560546875,
-    "avg_rate": 1296.9337185392365,
+    "latest_rate": 1464.8900146484375,
+    "avg_rate": 1296.9385649744083,
     "min_rate": 1083.6800537109375,
     "max_rate": 1486.1300048828125,
-    "volatility": 0.5934780374559118,
+    "volatility": 0.5929714028789036,
     "records": 1302
   },
   "samsung": {
-    "avg_daily_return": 0.056343330595192,
-    "volatility": 1.6952940641082974,
-    "total_return": 67.11373743562189,
-    "latest_close": 100200.0,
+    "avg_daily_return": 0.05708502980729583,
+    "volatility": 1.695864662605298,
+    "total_return": 68.61477001435547,
+    "latest_close": 101100.0,
     "records": 1223
   },
-  "kospi_spy_correlation": 0.11017439489270459,
+  "kospi_spy_correlation": 0.11030074219231129,
   "comparison": {
-    "kospi_return": 48.454446640380525,
-    "spy_return": 99.1002122596057,
-    "kospi_volatility": 1.161801227307085,
-    "spy_volatility": 1.0785492950652718
+    "kospi_return": 49.56035049978491,
+    "spy_return": 99.10024810281861,
+    "kospi_volatility": 1.1618334240565253,
+    "spy_volatility": 1.0785490404522602
   }
 }

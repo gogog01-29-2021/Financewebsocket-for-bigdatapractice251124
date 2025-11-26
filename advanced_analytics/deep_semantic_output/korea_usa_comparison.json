@@ -1,11 +1,11 @@
 {
   "key_metrics": {
-    "korea_avg_growth_10yr": 33844642494404.523,
-    "usa_avg_growth_10yr": 186396138485675.97,
-    "korea_gdp_latest": 2.32174328643543,
-    "usa_gdp_latest": 13.9911166360401,
-    "korea_usa_ratio_latest": 0.16594410202076282,
-    "growth_correlation": -0.052254226377297985
+    "korea_avg_growth_10yr": 2.4137291891021686,
+    "usa_avg_growth_10yr": 5.133751489264702,
+    "korea_gdp_latest": 1712792854202.37,
+    "usa_gdp_latest": 27720709000000.0,
+    "korea_usa_ratio_latest": 0.06178748365355194,
+    "growth_correlation": 0.473224178877784
   },
   "us_market": {
     "avg_daily_return": 0.04703181594728106,
@@ -13,5 +13,5 @@
     "total_return": 2650.498186245591,
     "sharpe_approx": 0.6353334526450328
   },
-  "years_analyzed": 55
+  "years_analyzed": 54
 }

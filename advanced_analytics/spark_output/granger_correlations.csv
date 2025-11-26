@@ -1,0 +1,11 @@
+direction,lag,correlation
+sentiment_to_return,1,0.03785333543971632
+return_to_sentiment,1,-0.001593343303287376
+sentiment_to_return,2,-0.01640265101958823
+return_to_sentiment,2,-0.0024081081473971
+sentiment_to_return,3,-0.02255722315213464
+return_to_sentiment,3,0.027486566024788568
+sentiment_to_return,4,-0.020065557147672497
+return_to_sentiment,4,0.03946518529920732
+sentiment_to_return,5,0.03829476029655393
+return_to_sentiment,5,0.016199380705208842

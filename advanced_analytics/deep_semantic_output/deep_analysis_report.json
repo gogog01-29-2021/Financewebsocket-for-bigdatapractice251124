@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-26T10:17:06.994744",
+  "generated_at": "2025-11-26T12:04:45.124047",
   "analyses_completed": [
     "N-gram (Bigram/Trigram) Analysis",
     "TF-IDF by Sentiment",
@@ -9,6 +9,7 @@
     "Korea-USA Economic Comparison"
   ],
   "output_files": [
+    "deep_analysis_report.json",
     "entity_price_correlation.csv",
     "korea_market_analysis.json",
     "korea_usa_comparison.json",

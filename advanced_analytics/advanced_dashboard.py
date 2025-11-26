@@ -30,7 +30,11 @@ import networkx as nx
 # Directories
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data" / "batch"
+NEWS_DIR = DATA_DIR / "news"
+STOCK_DIR = DATA_DIR / "stocks"
+WORLDBANK_DIR = DATA_DIR / "worldbank"
 OUTPUT_DIR = Path(__file__).parent / "spark_output"
+DEEP_OUTPUT_DIR = Path(__file__).parent / "deep_semantic_output"
 
 
 @st.cache_data(ttl=300)
@@ -122,7 +126,7 @@ def show_raw_data():
 
     with tabs[0]:
         st.subheader("Stock Data (Yahoo Finance)")
-        stock_file = DATA_DIR / "stock_data.csv"
+        stock_file = STOCK_DIR / "stock_prices.csv"
         if stock_file.exists():
             stock_df = pd.read_csv(stock_file)
 
@@ -149,7 +153,7 @@ def show_raw_data():
 
     with tabs[1]:
         st.subheader("News Headlines")
-        news_file = DATA_DIR / "news_headlines.csv"
+        news_file = NEWS_DIR / "financial_news_headlines.csv"
         if news_file.exists():
             news_df = pd.read_csv(news_file)
 
@@ -184,17 +188,27 @@ def show_raw_data():
         st.subheader("Economic Indicators")
 
         # World Bank GDP
-        gdp_file = DATA_DIR / "worldbank_gdp.csv"
+        gdp_file = WORLDBANK_DIR / "world_bank_indicators.csv"
         if gdp_file.exists():
             gdp_df = pd.read_csv(gdp_file)
-            st.write("**World Bank GDP Data**")
+            st.write("**World Bank Economic Indicators**")
 
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
                 st.metric("Records", f"{len(gdp_df):,}")
             with col2:
-                if 'country' in gdp_df.columns:
-                    st.metric("Countries", gdp_df['country'].nunique())
+                if 'country_name' in gdp_df.columns:
+                    st.metric("Countries", gdp_df['country_name'].nunique())
+            with col3:
+                if 'indicator_name' in gdp_df.columns:
+                    st.metric("Indicators", gdp_df['indicator_name'].nunique())
+
+            # Filter by country
+            if 'country_name' in gdp_df.columns:
+                countries = ['All'] + sorted(gdp_df['country_name'].unique().tolist())
+                selected_country = st.selectbox("Filter by Country", countries)
+                if selected_country != 'All':
+                    gdp_df = gdp_df[gdp_df['country_name'] == selected_country]
 
             st.dataframe(gdp_df.head(200), use_container_width=True)
 
