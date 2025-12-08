@@ -36,6 +36,409 @@ WORLDBANK_DIR = DATA_DIR / "worldbank"
 OUTPUT_DIR = Path(__file__).parent / "spark_output"
 DEEP_OUTPUT_DIR = Path(__file__).parent / "deep_semantic_output"
 
+# ============================================================
+# DATA SOURCE DOCUMENTATION (데이터 출처 문서)
+# ============================================================
+DATA_SOURCE_INFO = {
+    "pagerank": """
+**📊 Data Period (데이터 기간):** 2025-12-03 ~ 2025-12-04 (News Headlines)
+
+**📁 Raw Data:** `data/batch/news/financial_news_headlines.csv` (221 rows)
+**🌐 API:** NewsAPI (https://newsapi.org)
+**📜 Script:** `advanced_spark_cross_analysis.py` (lines 111-242)
+**📤 Output:** `spark_output/word_pagerank.csv`
+
+---
+**🔧 Algorithm Code (PageRank):**
+```python
+def calculate_pagerank(self, damping=0.85, iterations=20, top_n=100):
+    # Initialize PageRank
+    n = len(top_words)
+    pr = {word: 1.0 / n for word in top_words}
+
+    # Iterate
+    for iteration in range(iterations):
+        new_pr = {}
+        for word in top_words:
+            incoming_pr = 0
+            for other_word in top_words:
+                if word in self.cooccurrence[other_word]:
+                    weight = self.cooccurrence[other_word][word]
+                    total_out = sum(self.cooccurrence[other_word][w]
+                                    for w in self.cooccurrence[other_word])
+                    incoming_pr += pr[other_word] * (weight / total_out)
+
+            new_pr[word] = (1 - damping) / n + damping * incoming_pr
+        pr = new_pr
+    return pr
+```
+    """,
+
+    "word_network": """
+**📊 Data Period:** 2025-12-03 ~ 2025-12-04 (News Headlines)
+
+**📁 Raw Data:** `data/batch/news/financial_news_headlines.csv`
+**🌐 API:** NewsAPI
+**📜 Script:** `advanced_spark_cross_analysis.py` (lines 123-161)
+**📤 Output:** `spark_output/word_graph_edges.csv`
+
+---
+**🔧 Algorithm Code (Co-occurrence Graph):**
+```python
+def build_word_graph(self):
+    # Build co-occurrence matrix
+    cooccurrence = defaultdict(lambda: defaultdict(int))
+    word_freq = Counter()
+
+    for row in headlines_words:
+        words = [w.lower() for w in row['filtered_words']
+                 if len(w) > 2 and w.lower() not in STOP_WORDS]
+        words = list(set(words))  # Unique words per headline
+
+        for word in words:
+            word_freq[word] += 1
+
+        # Co-occurrence (undirected edges)
+        for i, w1 in enumerate(words):
+            for w2 in words[i+1:]:
+                cooccurrence[w1][w2] += 1
+                cooccurrence[w2][w1] += 1
+
+    return cooccurrence
+```
+    """,
+
+    "granger": """
+**📊 Data Period:**
+- News: 2025-12-03 ~ 2025-12-04
+- Stock: 1962-01-02 ~ 2025-12-05 (179,289 rows)
+
+**📁 Raw Data:** News headlines + Stock prices
+**🌐 API:** NewsAPI + Yahoo Finance
+**📜 Script:** `advanced_spark_cross_analysis.py` (lines 708-769)
+**📤 Output:** `spark_output/granger_correlations.csv`
+
+---
+**🔧 Algorithm Code (Granger-style Causality):**
+```python
+def granger_style_analysis(self, max_lag=5):
+    # Calculate lagged correlations
+    for lag in range(1, max_lag + 1):
+        combined = combined.withColumn(
+            f"return_lag{lag}", F.lag("return", lag).over(window)
+        ).withColumn(
+            f"sentiment_lag{lag}", F.lag("sentiment", lag).over(window)
+        )
+
+    results = []
+    for lag in range(1, max_lag + 1):
+        # Sentiment -> Return correlation
+        corr_s2r = pdf['return'].corr(pdf[f'sentiment_lag{lag}'])
+        results.append({
+            'direction': 'sentiment_to_return',
+            'lag': lag, 'correlation': corr_s2r
+        })
+
+        # Return -> Sentiment correlation
+        corr_r2s = pdf['sentiment'].corr(pdf[f'return_lag{lag}'])
+        results.append({
+            'direction': 'return_to_sentiment',
+            'lag': lag, 'correlation': corr_r2s
+        })
+    return results
+```
+    """,
+
+    "word_price": """
+**📊 Data Period:**
+- News: 2025-12-03 ~ 2025-12-04
+- Stock: 1962-01-02 ~ 2025-12-05
+
+**📁 Raw Data:** News headlines + Stock prices
+**🌐 API:** NewsAPI + Yahoo Finance
+**📜 Script:** `advanced_spark_cross_analysis.py` (lines 655-701)
+**📤 Output:** `spark_output/word_before_price_lag1.csv`
+
+---
+**🔧 Algorithm Code (Word-Price Prediction):**
+```python
+def word_before_price_movement(self, lag_days=1):
+    # Calculate predictive bias
+    word_direction_pivot = word_direction_pivot.na.fill(0) \
+        .withColumn("total", F.col("up") + F.col("down") + F.col("flat")) \
+        .withColumn("up_ratio", F.col("up") / F.col("total")) \
+        .withColumn("down_ratio", F.col("down") / F.col("total")) \
+        .withColumn("predictive_bias",
+                    F.col("up_ratio") - F.col("down_ratio")) \
+        .filter(F.col("total") > 50)
+
+    # Sort by absolute predictive bias
+    pdf = word_direction_pivot.orderBy(
+        F.abs("predictive_bias").desc()
+    ).toPandas()
+    return pdf
+```
+    """,
+
+    "tfidf": """
+**📊 Data Period:** 2025-12-03 ~ 2025-12-04 (News Headlines)
+
+**📁 Raw Data:** `data/batch/news/financial_news_headlines.csv`
+**🌐 API:** NewsAPI
+**📜 Script:** `deep_semantic_analysis.py` (lines 163-248)
+**📤 Output:** `deep_semantic_output/tfidf_by_sentiment.csv`
+
+---
+**🔧 Algorithm Code (TF-IDF):**
+```python
+def compute_tfidf_by_sentiment(self):
+    # Count vectorizer
+    cv = CountVectorizer(inputCol="filtered",
+                         outputCol="raw_features", minDF=5)
+    cv_model = cv.fit(df)
+    df = cv_model.transform(df)
+
+    # IDF (Inverse Document Frequency)
+    idf = IDF(inputCol="raw_features", outputCol="tfidf_features")
+    idf_model = idf.fit(df)
+    df = idf_model.transform(df)
+
+    # TF-IDF = TF * IDF
+    # TF: Term Frequency in document
+    # IDF: log(N / df) where df = document frequency
+
+    # Aggregate TF-IDF scores by sentiment
+    for sentiment in ['positive', 'negative', 'neutral']:
+        tfidf_vectors = sentiment_df.select("tfidf_features").collect()
+        for row in tfidf_vectors:
+            for idx, value in zip(vector.indices, vector.values):
+                word_scores[vocabulary[idx]] += value
+```
+    """,
+
+    "lda": """
+**📊 Data Period:** 2025-12-03 ~ 2025-12-04 (News Headlines)
+
+**📁 Raw Data:** `data/batch/news/financial_news_headlines.csv`
+**🌐 API:** NewsAPI
+**📜 Script:** `deep_semantic_analysis.py` (lines 251-353)
+**📤 Output:** `deep_semantic_output/lda_topics.csv`
+
+---
+**🔧 Algorithm Code (LDA Topic Modeling):**
+```python
+def discover_topics(self):
+    # CountVectorizer for bag-of-words
+    cv = CountVectorizer(inputCol="filtered", outputCol="features",
+                         minDF=10, maxDF=0.8)
+
+    # LDA (Latent Dirichlet Allocation)
+    lda = LDA(k=self.num_topics,  # k=8 topics
+              maxIter=20,
+              optimizer="online")
+    lda_model = lda.fit(df)
+
+    # Get topic-word distribution
+    topics = lda_model.describeTopics(maxTermsPerTopic=15)
+
+    # Assign dominant topic to each document
+    transformed = lda_model.transform(df)
+    # Find max probability topic
+    dominant_topic = expr(
+        "array_position(topic_array, array_max(topic_array)) - 1"
+    )
+```
+    """,
+
+    "word2vec": """
+**📊 Data Period:** 2025-12-03 ~ 2025-12-04 (News Headlines)
+
+**📁 Raw Data:** `data/batch/news/financial_news_headlines.csv`
+**🌐 API:** NewsAPI
+**📜 Script:** `deep_semantic_analysis.py` (lines 356-449)
+**📤 Output:** `deep_semantic_output/word2vec_similarities.csv`
+
+---
+**🔧 Algorithm Code (Word2Vec - Gensim):**
+```python
+def train_word2vec(self, vector_size=100, min_count=5):
+    # Train Gensim Word2Vec
+    self.model = GensimWord2Vec(
+        sentences=sentences,
+        vector_size=100,  # 100-dimensional vectors
+        window=5,         # context window size
+        min_count=5,      # minimum word frequency
+        workers=1,
+        epochs=10
+    )
+
+    # Find similar words using cosine similarity
+    # similarity = cos(vec_a, vec_b) = (a·b) / (||a|| * ||b||)
+    similar_words = self.model.wv.most_similar(term, topn=5)
+
+    # Word vectors can be used for:
+    # - king - man + woman = queen
+    # - stock + positive = growth?
+```
+    """,
+
+    "ngram": """
+**📊 Data Period:** 2025-12-03 ~ 2025-12-04 (News Headlines)
+
+**📁 Raw Data:** `data/batch/news/financial_news_headlines.csv`
+**🌐 API:** NewsAPI
+**📜 Script:** `deep_semantic_analysis.py` (lines 87-160)
+**📤 Output:** `deep_semantic_output/ngram_analysis.csv`
+
+---
+**🔧 Algorithm Code (N-gram Extraction):**
+```python
+def extract_ngrams(self, n_values=[2, 3]):
+    # Tokenize with regex
+    tokenizer = RegexTokenizer(
+        inputCol="headline_clean",
+        outputCol="words",
+        pattern="\\W"  # split on non-word characters
+    )
+
+    # Remove stopwords
+    remover = StopWordsRemover(inputCol="words", outputCol="filtered")
+
+    for n in n_values:  # n=2 (bigrams), n=3 (trigrams)
+        # NGram transformer
+        ngram = NGram(n=n,
+                      inputCol="filtered_words",
+                      outputCol=f"ngrams_{n}")
+
+        # Explode and count
+        ngram_counts = df_ngram.select(
+            explode(col(f"ngrams_{n}")).alias("ngram")
+        ).groupBy("ngram").count()
+```
+    """,
+
+    "multi_asset": """
+**📊 Data Period:**
+- World Bank GDP: 1970 ~ 2024 (85,175 rows)
+- Stock prices: 1962 ~ 2025 (179,289 rows)
+- FRED data: 1970 ~ 2024 (40,165 rows)
+
+**📁 Raw Data:**
+- `data/batch/worldbank/world_bank_indicators.csv`
+- `data/batch/stocks/stock_prices.csv`
+- `data/batch/fred/economic_indicators.csv`
+
+**🌐 API:** World Bank API, Yahoo Finance, FRED API
+**📜 Script:** `multi_asset_correlation_analysis.py`
+**📤 Output:** `output/correlation_matrix.csv`, `output/linear_regression_results.csv`
+
+---
+**🔧 Algorithm Code (Pearson Correlation):**
+```python
+# Pearson Correlation Matrix
+# r = Σ[(xi - x̄)(yi - ȳ)] / √[Σ(xi - x̄)² * Σ(yi - ȳ)²]
+
+correlation_matrix = merged_df[numeric_cols].corr(method='pearson')
+
+# Filter significant correlations (|r| > 0.5, p < 0.05)
+significant_correlations = []
+for i, col1 in enumerate(numeric_cols):
+    for j, col2 in enumerate(numeric_cols):
+        if i < j:  # Upper triangle only
+            r = correlation_matrix.loc[col1, col2]
+            if abs(r) > 0.5:
+                significant_correlations.append({
+                    'pair': f'{col1} vs {col2}',
+                    'correlation': r
+                })
+```
+    """,
+
+    "korea_usa": """
+**📊 Data Period:**
+- World Bank GDP: 1970 ~ 2023 (54 years)
+- KOSPI: 2020-11-26 ~ 2025-11-26 (1,224 rows)
+- KRW/USD: 2020-11-26 ~ 2025-11-26 (1,302 rows)
+- Samsung: 2020-11-26 ~ 2025-11-26 (1,223 rows)
+
+**📁 Raw Data:** World Bank GDP for USA & Korea
+**🌐 API:** World Bank API, Yahoo Finance
+**📜 Script:** `deep_semantic_analysis.py` (lines 573-729)
+**📤 Output:** `deep_semantic_output/korea_usa_gdp_comparison.csv`
+
+---
+**🔧 Algorithm Code (GDP Growth Comparison):**
+```python
+def compare_economies(self):
+    # Filter by GDP indicator
+    gdp_indicator = 'NY.GDP.MKTP.CD'  # GDP (current US$)
+
+    # Calculate growth rates
+    comp_df['korea_growth'] = comp_df['korea_gdp'].pct_change() * 100
+    comp_df['usa_growth'] = comp_df['usa_gdp'].pct_change() * 100
+    comp_df['growth_diff'] = comp_df['korea_growth'] - comp_df['usa_growth']
+
+    # Key metrics
+    'growth_correlation': comp_df['korea_growth'].corr(comp_df['usa_growth'])
+    'korea_usa_ratio': korea_gdp / usa_gdp
+
+    # Sharpe Ratio approximation
+    sharpe = daily_return.mean() / daily_return.std() * np.sqrt(252)
+```
+    """,
+
+    "entity_price": """
+**📊 Data Period:**
+- News: 2025-12-03 ~ 2025-12-04
+- Stock: 1962-01-02 ~ 2025-12-05
+
+**📁 Raw Data:** News + Stock prices
+**🌐 API:** NewsAPI + Yahoo Finance
+**📜 Script:** `deep_semantic_analysis.py` (lines 452-570)
+**📤 Output:** `deep_semantic_output/entity_price_correlation.csv`
+
+---
+**🔧 Algorithm Code (Entity-Price Correlation):**
+```python
+def analyze_entity_price(self):
+    symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA',
+               'META', 'NVDA', 'JPM', 'GS', 'BAC']
+
+    # Create stock mention flags
+    for symbol in symbols:
+        news_with_stocks = news_with_stocks.withColumn(
+            f"mentions_{symbol}",
+            when(
+                lower(col("headline")).contains(symbol.lower()) |
+                lower(col("headline")).contains(company_name.lower()),
+                1
+            ).otherwise(0)
+        )
+
+    # Calculate correlations
+    # Same-day: mentions today vs return today
+    same_day_corr = joined.select(
+        corr(mention_col, return_col)
+    ).collect()[0][0]
+
+    # Next-day: mentions today vs return tomorrow
+    next_day_corr = joined_lag.select(
+        corr(mention_col, "next_return")
+    ).collect()[0][0]
+```
+    """
+}
+
+
+def show_data_source(key):
+    """Display data source documentation in an expander"""
+    if key in DATA_SOURCE_INFO:
+        with st.expander("📋 데이터 출처 & 알고리즘 (Data Source & Algorithm)", expanded=False):
+            st.markdown(DATA_SOURCE_INFO[key])
+
+
+
+
 
 @st.cache_data(ttl=300)
 def load_output(filename):
@@ -330,6 +733,7 @@ def show_overview():
 def show_pagerank():
     """Show PageRank analysis"""
     st.header("🏆 PageRank Word Importance")
+    show_data_source("pagerank")
 
     st.markdown("""
     **PageRank Algorithm** (Google's original search ranking algorithm) applied to words:
@@ -387,6 +791,7 @@ def show_pagerank():
 def show_word_network():
     """Show word co-occurrence network"""
     st.header("🕸️ Word Co-occurrence Network")
+    show_data_source("word_network")
 
     edges = load_output("word_graph_edges.csv")
 
@@ -578,6 +983,7 @@ def show_formal_informal():
 def show_word_price():
     """Show word-price causality analysis"""
     st.header("📈 Word-Price Causality Analysis")
+    show_data_source("word_price")
 
     word_before = load_output("word_before_price_lag1.csv")
 
@@ -747,6 +1153,7 @@ def show_social_media():
 def show_granger():
     """Show Granger causality analysis"""
     st.header("🔄 Granger Causality Analysis")
+    show_data_source("granger")
 
     granger = load_output("granger_correlations.csv")
 
@@ -830,6 +1237,12 @@ def show_granger():
 
 DEEP_OUTPUT_DIR = Path(__file__).parent / "deep_semantic_output"
 
+# ============================================================
+# DATA SOURCE DOCUMENTATION (데이터 출처 문서)
+# ============================================================
+
+
+
 
 @st.cache_data(ttl=300)
 def load_deep_output(filename):
@@ -853,6 +1266,7 @@ def load_deep_output(filename):
 def show_ngrams():
     """Show N-gram phrase analysis"""
     st.header("📚 N-gram (Phrase) Analysis")
+    show_data_source("ngram")
 
     st.markdown("""
     **N-grams** are sequences of N consecutive words:
@@ -913,6 +1327,7 @@ def show_ngrams():
 def show_tfidf():
     """Show TF-IDF analysis"""
     st.header("🎯 TF-IDF Analysis")
+    show_data_source("tfidf")
 
     st.markdown("""
     **TF-IDF (Term Frequency - Inverse Document Frequency)** finds words that are:
@@ -957,6 +1372,7 @@ def show_tfidf():
 def show_lda():
     """Show LDA topic modeling"""
     st.header("🏷️ Topic Modeling (LDA)")
+    show_data_source("lda")
 
     st.markdown("""
     **Latent Dirichlet Allocation (LDA)** automatically discovers hidden topics in text:
@@ -1032,6 +1448,7 @@ def show_lda():
 def show_word2vec():
     """Show Word2Vec embeddings"""
     st.header("🧠 Word2Vec Embeddings")
+    show_data_source("word2vec")
 
     st.markdown("""
     **Word2Vec** learns word meanings from context:
@@ -1082,6 +1499,7 @@ def show_word2vec():
 def show_entity_price():
     """Show entity-price correlation"""
     st.header("🏢 Entity-Specific Price Correlation")
+    show_data_source("entity_price")
 
     st.markdown("""
     **Entity-Price Analysis** measures how mentions of specific companies affect their stock prices:
@@ -1145,6 +1563,7 @@ def show_entity_price():
 def show_korea_usa():
     """Show Korea vs USA comparison"""
     st.header("🇰🇷🇺🇸 Korea vs USA Economic Comparison")
+    show_data_source("korea_usa")
 
     st.markdown("""
     **Comparing Two Economies:**
@@ -1292,6 +1711,7 @@ def load_multi_asset_output(filename):
 def show_multi_asset_correlation():
     """Show multi-asset correlation overview"""
     st.header("📊 Multi-Asset Correlation Analysis")
+    show_data_source("multi_asset")
 
     st.markdown("""
     **Cross-Asset Correlation Study:**
@@ -1406,6 +1826,7 @@ def show_multi_asset_correlation():
 def show_correlation_heatmap_multi():
     """Show correlation heatmap for multi-asset data"""
     st.header("🔥 Multi-Asset Correlation Heatmap")
+    show_data_source("multi_asset")
 
     st.markdown("""
     **Pearson Correlation Matrix:**
@@ -1486,6 +1907,7 @@ def show_correlation_heatmap_multi():
 def show_linear_regression():
     """Show linear regression analysis"""
     st.header("📉 Linear Regression Analysis")
+    show_data_source("multi_asset")
 
     st.markdown("""
     **Pairwise Linear Regression:**
@@ -1566,6 +1988,7 @@ def show_linear_regression():
 def show_decade_analysis():
     """Show decade-by-decade analysis"""
     st.header("📅 Decade Analysis")
+    show_data_source("multi_asset")
 
     st.markdown("""
     **Growth Analysis by Decade:**

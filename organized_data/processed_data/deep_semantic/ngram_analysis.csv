@@ -1,0 +1,201 @@
+ngram,total_count,negative,neutral,positive,n
+market volatility,1477,648.0,829.0,,2
+wall street,1187,575.0,,612.0,2
+goldman sachs,909,279.0,225.0,405.0,2
+johnson johnson,898,279.0,236.0,383.0,2
+flat investors,869,,869.0,,2
+await fed,869,,869.0,,2
+markets flat,869,,869.0,,2
+fed decision,869,,869.0,,2
+investors await,869,,869.0,,2
+bank america,856,259.0,238.0,359.0,2
+economic uncertainty,847,,847.0,,2
+guidance amid,847,,847.0,,2
+amid economic,847,,847.0,,2
+maintains guidance,847,,847.0,,2
+volatility expected,829,,829.0,,2
+continue experts,829,,829.0,,2
+expected continue,829,,829.0,,2
+experts say,829,,829.0,,2
+investors reassess,820,,820.0,,2
+rotation continues,820,,820.0,,2
+reassess portfolios,820,,820.0,,2
+sector rotation,820,,820.0,,2
+continues investors,820,,820.0,,2
+new patent,801,,801.0,,2
+files new,801,,801.0,,2
+priorities conference,790,,790.0,,2
+discusses strategic,790,,790.0,,2
+strategic priorities,790,,790.0,,2
+ceo discusses,790,,790.0,,2
+report earnings,780,,780.0,,2
+analysts mixed,780,,780.0,,2
+earnings next,780,,780.0,,2
+next week,780,,780.0,,2
+week analysts,780,,780.0,,2
+ahead holiday,777,,777.0,,2
+holiday weekend,777,,777.0,,2
+volume light,777,,777.0,,2
+trading volume,777,,777.0,,2
+light ahead,777,,777.0,,2
+signals confidence,666,,,666.0,2
+raises dividend,666,,,666.0,2
+dividend signals,666,,,666.0,2
+confidence growth,666,,,666.0,2
+earnings estimates,664,664.0,,,2
+faces regulatory,664,664.0,,,2
+estimates cuts,664,664.0,,,2
+misses earnings,664,664.0,,,2
+cuts fullyear,664,664.0,,,2
+fullyear outlook,664,664.0,,,2
+regulatory scrutiny,664,664.0,,,2
+surges strong,660,,,660.0,2
+strong earnings,660,,,660.0,2
+earnings beat,660,,,660.0,2
+stock surges,660,,,660.0,2
+amid market,648,648.0,,,2
+announces layoffs,648,648.0,,,2
+concerns mount,648,648.0,,,2
+layoffs affecting,648,648.0,,,2
+affecting employees,648,648.0,,,2
+stock plunges,636,636.0,,,2
+plunges disappointing,636,636.0,,,2
+disappointing guidance,636,636.0,,,2
+shows resilience,635,,,635.0,2
+expectations economy,635,,,635.0,2
+exceeds expectations,635,,,635.0,2
+economy shows,635,,,635.0,2
+gdp growth,635,,,635.0,2
+growth exceeds,635,,,635.0,2
+signals potential,626,,,626.0,2
+fed signals,626,,,626.0,2
+markets rally,626,,,626.0,2
+potential rate,626,,,626.0,2
+cuts markets,626,,,626.0,2
+rate cuts,626,,,626.0,2
+quarterly revenue,625,,,625.0,2
+oil prices,625,625.0,,,2
+prices surge,625,625.0,,,2
+raising inflation,625,625.0,,,2
+inflation concerns,625,625.0,,,2
+surge raising,625,625.0,,,2
+record quarterly,625,,,625.0,2
+announces record,625,,,625.0,2
+revenue b,625,,,625.0,2
+deal worth,617,,,617.0,2
+worth b,617,,,617.0,2
+landmark deal,617,,,617.0,2
+safety concerns,616,616.0,,,2
+due safety,616,616.0,,,2
+unemployment rises,615,615.0,,,2
+rises sparking,615,615.0,,,2
+economic concerns,615,615.0,,,2
+sparking economic,615,615.0,,,2
+markets tumble,614,614.0,,,2
+fed raises,614,614.0,,,2
+rates markets,614,614.0,,,2
+raises rates,614,614.0,,,2
+buy target,612,,,612.0,2
+street upgrades,612,,,612.0,2
+unemployment falls,605,,,605.0,2
+lowest decades,605,,,605.0,2
+flat investors await,869,,869.0,,3
+await fed decision,869,,869.0,,3
+markets flat investors,869,,869.0,,3
+investors await fed,869,,869.0,,3
+maintains guidance amid,847,,847.0,,3
+guidance amid economic,847,,847.0,,3
+amid economic uncertainty,847,,847.0,,3
+expected continue experts,829,,829.0,,3
+continue experts say,829,,829.0,,3
+volatility expected continue,829,,829.0,,3
+market volatility expected,829,,829.0,,3
+rotation continues investors,820,,820.0,,3
+continues investors reassess,820,,820.0,,3
+investors reassess portfolios,820,,820.0,,3
+sector rotation continues,820,,820.0,,3
+files new patent,801,,801.0,,3
+ceo discusses strategic,790,,790.0,,3
+discusses strategic priorities,790,,790.0,,3
+strategic priorities conference,790,,790.0,,3
+report earnings next,780,,780.0,,3
+earnings next week,780,,780.0,,3
+week analysts mixed,780,,780.0,,3
+next week analysts,780,,780.0,,3
+ahead holiday weekend,777,,777.0,,3
+trading volume light,777,,777.0,,3
+light ahead holiday,777,,777.0,,3
+volume light ahead,777,,777.0,,3
+signals confidence growth,666,,,666.0,3
+raises dividend signals,666,,,666.0,3
+dividend signals confidence,666,,,666.0,3
+estimates cuts fullyear,664,664.0,,,3
+cuts fullyear outlook,664,664.0,,,3
+earnings estimates cuts,664,664.0,,,3
+faces regulatory scrutiny,664,664.0,,,3
+misses earnings estimates,664,664.0,,,3
+surges strong earnings,660,,,660.0,3
+stock surges strong,660,,,660.0,3
+strong earnings beat,660,,,660.0,3
+amid market volatility,648,648.0,,,3
+announces layoffs affecting,648,648.0,,,3
+layoffs affecting employees,648,648.0,,,3
+stock plunges disappointing,636,636.0,,,3
+plunges disappointing guidance,636,636.0,,,3
+gdp growth exceeds,635,,,635.0,3
+expectations economy shows,635,,,635.0,3
+growth exceeds expectations,635,,,635.0,3
+exceeds expectations economy,635,,,635.0,3
+economy shows resilience,635,,,635.0,3
+cuts markets rally,626,,,626.0,3
+fed signals potential,626,,,626.0,3
+rate cuts markets,626,,,626.0,3
+potential rate cuts,626,,,626.0,3
+signals potential rate,626,,,626.0,3
+raising inflation concerns,625,625.0,,,3
+prices surge raising,625,625.0,,,3
+quarterly revenue b,625,,,625.0,3
+surge raising inflation,625,625.0,,,3
+record quarterly revenue,625,,,625.0,3
+announces record quarterly,625,,,625.0,3
+oil prices surge,625,625.0,,,3
+deal worth b,617,,,617.0,3
+landmark deal worth,617,,,617.0,3
+due safety concerns,616,616.0,,,3
+rises sparking economic,615,615.0,,,3
+sparking economic concerns,615,615.0,,,3
+unemployment rises sparking,615,615.0,,,3
+raises rates markets,614,614.0,,,3
+rates markets tumble,614,614.0,,,3
+fed raises rates,614,614.0,,,3
+wall street upgrades,612,,,612.0,3
+falls lowest decades,605,,,605.0,3
+unemployment falls lowest,605,,,605.0,3
+innovation analysts optimistic,602,,,602.0,3
+initiative drives innovation,602,,,602.0,3
+ai initiative drives,602,,,602.0,3
+sales exceed expectations,602,,,602.0,3
+drives innovation analysts,602,,,602.0,3
+hits alltime high,593,,,593.0,3
+sector leads market,593,,,593.0,3
+leads market rally,593,,,593.0,3
+tech sector leads,593,,,593.0,3
+fears grow gdp,584,584.0,,,3
+grow gdp contracts,584,584.0,,,3
+recession fears grow,584,584.0,,,3
+tech stocks slide,583,583.0,,,3
+trade tensions escalate,583,583.0,,,3
+escalate tech stocks,583,583.0,,,3
+tensions escalate tech,583,583.0,,,3
+wall street downgrades,575,575.0,,,3
+patent quantum computing,171,,171.0,,3
+new patent quantum,171,,171.0,,3
+new patent blockchain,167,,167.0,,3
+new patent machine,162,,162.0,,3
+patent machine learning,162,,162.0,,3
+new patent ai,156,,156.0,,3
+environmental compliance amid,149,149.0,,,3
+compliance amid market,149,149.0,,,3
+patent autonomous systems,145,,145.0,,3
+new patent autonomous,145,,145.0,,3
+regulatory scrutiny supply,139,139.0,,,3
